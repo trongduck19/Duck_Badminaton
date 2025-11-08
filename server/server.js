@@ -18,7 +18,7 @@ const port = process.env.PORT || 4000;
 await connectDB();
 await connectCloudinary();
 //Alow multiple origin
-const allowOrigin = ['http://localhost:5173','https://duck-badminaton.vercel.app/'];
+const allowOrigin = ['http://localhost:5173','https://duck-badminaton.vercel.app'];
 
 //Stripe Webhook
 app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);

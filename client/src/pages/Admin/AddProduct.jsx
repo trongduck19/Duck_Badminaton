@@ -12,11 +12,11 @@ const AddProduct = () => {
   const [offerPrice, setOfferPrice] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { axios } = useAppContext();
+  const { axios, currency } = useAppContext();
 
   const onSubmitHandler = async (event) => {
+    event.preventDefault();
     try {
-      event.preventDefault();
       setLoading(true);
 
       const productData = {
@@ -30,16 +30,14 @@ const AddProduct = () => {
 
       const formData = new FormData();
       formData.append('productData', JSON.stringify(productData));
-
-      for (let i = 0; i < files.length; i++) {
-        if (files[i]) formData.append('images', files[i]);
-      }
+      files.forEach((file) => {
+        if (file) formData.append('images', file);
+      });
 
       const { data } = await axios.post('/api/product/add', formData);
 
       if (data.success) {
         toast.success(data.message);
-
         setName('');
         setDescription('');
         setCategory('');
@@ -84,7 +82,6 @@ const AddProduct = () => {
                       setFiles(updatedFiles);
                     }}
                   />
-
                   {files[index] && (
                     <div
                       onClick={() => {
@@ -97,7 +94,6 @@ const AddProduct = () => {
                       ✕
                     </div>
                   )}
-
                   <div className="relative w-[100px] h-[100px] rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 flex items-center justify-center bg-gray-50 cursor-pointer transition">
                     {files[index] ? (
                       <img
@@ -153,6 +149,7 @@ const AddProduct = () => {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="outline-none py-2.5 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
+            required
           >
             <option value="">Select category</option>
             {categories.map((item, index) => (
@@ -163,7 +160,7 @@ const AddProduct = () => {
           </select>
         </div>
 
-        {/* --- PRICE --- */}
+        {/* --- PRICE & OFFER --- */}
         <div className="flex gap-4 flex-wrap">
           <div className="flex-1 flex flex-col gap-1">
             <label className="font-medium text-gray-700">Price ($)</label>
@@ -200,16 +197,18 @@ const AddProduct = () => {
       </form>
 
       {/* --- PREVIEW SECTION --- */}
-      <div className="hidden md:block flex-1 bg-white shadow-md rounded-2xl p-8 border border-gray-100">
+      <div className="hidden md:block flex-1 bg-white shadow-md rounded-2xl p-6 border border-gray-100">
         <h2 className="text-xl font-semibold mb-4 text-gray-800">Preview</h2>
 
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-4 flex flex-col items-center max-w-xs mx-auto">
+        <div className="relative bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-4 flex flex-col items-center max-w-xs mx-auto">
+          {/* Discount Badge */}
           {offerPrice && price && (
             <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-sm">
               -{Math.round(((price - offerPrice) / price) * 100)}%
             </div>
           )}
 
+          {/* Product Image */}
           <div className="w-full flex justify-center items-center bg-gray-50 rounded-xl mb-3 h-48 overflow-hidden">
             <img
               src={
@@ -222,11 +221,13 @@ const AddProduct = () => {
             />
           </div>
 
+          {/* Product Info */}
           <div className="text-center w-full">
             <h3 className="text-gray-800 font-semibold text-base line-clamp-2 h-[42px] leading-tight">
               {name || 'Product Name'}
             </h3>
 
+            {/* Rating */}
             <div className="flex items-center justify-center gap-1 mt-1">
               {[...Array(5)].map((_, i) => (
                 <img
@@ -239,10 +240,17 @@ const AddProduct = () => {
               <span className="text-xs text-gray-400 ml-1">(0)</span>
             </div>
 
+            {/* Price */}
             <div className="mt-3 flex items-center justify-center gap-2">
-              <p className="text-primary font-bold text-lg">${offerPrice || price || '0'}</p>
+              <p className="text-primary font-bold text-lg">
+                {currency}
+                {offerPrice || price || '0'}
+              </p>
               {offerPrice && price && (
-                <p className="text-gray-400 text-sm line-through">${price}</p>
+                <p className="text-gray-400 text-sm line-through">
+                  {currency}
+                  {price}
+                </p>
               )}
             </div>
           </div>

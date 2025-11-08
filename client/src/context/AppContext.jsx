@@ -60,9 +60,40 @@ export const AppContextProvider = ({ children }) => {
       console.log(error);
     }
   };
+  const updateProduct = async (id, updatedProduct) => {
+    try {
+      const { data } = await axios.put(`/api/product/update/${id}`, updatedProduct);
+      if (data.success) {
+        toast.success('Product updated successfully');
+        fetchProducts();
+      } else {
+        toast.error(data.message);
+      }
+      return data;
+    } catch (error) {
+      toast.error('Error updating product');
+      console.log(error);
+    }
+  };
+
+  // DELETE
+  const deleteProduct = async (id) => {
+    try {
+      const { data } = await axios.delete(`/api/product/delete/${id}`);
+      if (data.success) {
+        toast.success('Product deleted successfully');
+        fetchProducts();
+      } else {
+        toast.error(data.message);
+      }
+      return data;
+    } catch (error) {
+      toast.error('Error deleting product');
+      console.log(error);
+    }
+  };
 
   const addToCart = (itemId) => {
-
     const cartData = structuredClone(cartItems || {});
 
     cartData[itemId] = (cartData[itemId] || 0) + 1;
@@ -146,6 +177,8 @@ export const AppContextProvider = ({ children }) => {
     products,
     currency,
     addToCart,
+    updateProduct,
+    deleteProduct,
     updateCartItem,
     removeFromCart,
     cartItems,

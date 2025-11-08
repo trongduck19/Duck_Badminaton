@@ -1,4 +1,4 @@
-import { Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { assets } from '../../assets/assets';
@@ -9,6 +9,7 @@ const SellerLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // trạng thái show/hide password
 
   const onSubmitHandler = async (event) => {
     try {
@@ -69,18 +70,24 @@ const SellerLogin = () => {
           </div>
 
           {/* Password Input */}
-          <div className="space-y-1">
+          <div className="space-y-1 relative">
             <label className="text-gray-700 font-medium text-lg">Password</label>
             <div className="flex items-center border border-gray-300 rounded-lg px-3 focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary transition">
               <Lock className="w-6 h-6 text-gray-400 mr-2" />
               <input
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 className="w-full p-2 outline-none text-gray-700 bg-transparent placeholder:text-gray-400"
                 required
               />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 cursor-pointer text-gray-700"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </span>
             </div>
           </div>
 

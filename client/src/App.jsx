@@ -18,6 +18,8 @@ import Home from './pages/Home';
 import MyOrders from './pages/MyOrders';
 import ProductCategory from './pages/ProductCategory';
 import ProductDetails from './pages/ProductDetails';
+import EditProduct from './pages/Admin/EditProduct';
+import OrderDetails from './pages/Admin/OrderDetails';
 const App = () => {
   const isSellerPath = useLocation().pathname.includes('seller');
   const { showUserLogin, isSeller } = useAppContext();
@@ -43,6 +45,8 @@ const App = () => {
             <Route index element={isSeller ? <AddProduct /> : null} />
             <Route path="product-list" element={<ProductList />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="edit/:id" element={<EditProduct />} />
+            <Route path="orders/:id" element={<OrderDetails />} />
           </Route>
         </Routes>
       </div>

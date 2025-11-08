@@ -169,3 +169,65 @@ export const getAllOrders = async (req, res) => {
     return res.json({ success: false, message: error.message });
   }
 };
+
+export const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findById(id)
+      .populate('items.product', 'name image offerPrice')
+      .populate('userId', 'name email');
+
+    if (!order) {
+      return res.json({ success: false, message: 'Order not found' });
+    }
+
+    res.json({ success: true, order });
+  } catch (error) {
+    console.error('Get order error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Refunded'];
+    if (!validStatuses.includes(status)) {
+      return res.json({ success: false, message: 'Invalid order status' });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.json({ success: false, message: 'Order not found' });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({ success: true, message: 'Order status updated', order });
+  } catch (error) {
+    console.error('Update order status error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const deleteOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    await Order.findByIdAndDelete(orderId);
+    res.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Delete order error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

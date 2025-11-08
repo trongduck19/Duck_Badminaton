@@ -1,14 +1,15 @@
-import { LogIn, UserPlus } from 'lucide-react'; // nhớ cài: npm i lucide-react
+import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
 import React from 'react';
 import { toast } from 'react-hot-toast';
 import { useAppContext } from '../context/AppContext';
 
 const Login = () => {
   const { setShowUserLogin, setUser, axios, navigate } = useAppContext();
-  const [state, setState] = React.useState('login');
+  const [state, setState] = React.useState('login'); // 'login' hoặc 'register'
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false); // trạng thái show/hide pass
 
   const onSubmitHandler = async (event) => {
     try {
@@ -20,11 +21,11 @@ const Login = () => {
         setUser(data.user);
         setShowUserLogin(false);
       } else {
-        toast.error(data.message );
+        toast.error(data.message);
       }
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-      toast.error(error.response?.data?.message );
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -53,7 +54,7 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Name */}
+        {/* Name (chỉ khi register) */}
         {state === 'register' && (
           <div className="w-full">
             <label className="text-gray-700 text-sm font-medium">Full Name</label>
@@ -82,19 +83,25 @@ const Login = () => {
         </div>
 
         {/* Password */}
-        <div className="w-full">
+        <div className="w-full relative">
           <label className="text-gray-700 text-sm font-medium">Password</label>
           <input
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             placeholder="••••••••"
+            type={showPassword ? 'text' : 'password'}
             className="mt-1 w-full p-2.5 rounded-md border border-gray-200 text-gray-700 placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-            type="password"
             required
           />
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2 bottom-3 cursor-pointer text-gray-700"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </span>
         </div>
 
-        {/* Button */}
+        {/* Submit Button */}
         <button
           type="submit"
           className="mt-2 bg-gradient-to-r from-primary to-primary/70 hover:from-primary/90 hover:to-primary/60 text-white w-full py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
@@ -102,7 +109,7 @@ const Login = () => {
           {state === 'register' ? 'Create Account' : 'Login'}
         </button>
 
-        {/* Switch */}
+        {/* Switch login/register */}
         <p className="text-center text-gray-600 text-sm mt-3">
           {state === 'register' ? (
             <>
