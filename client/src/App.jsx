@@ -6,7 +6,7 @@ import Loading from './components/Loading';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
 import { useAppContext } from './context/AppContext';
-import AddAddress from './pages/Addaddress';
+import AddAddress from './pages/AddAddress';
 import AddProduct from './pages/Admin/AddProduct';
 import Orders from './pages/Admin/Orders';
 import ProductList from './pages/Admin/ProductList';
