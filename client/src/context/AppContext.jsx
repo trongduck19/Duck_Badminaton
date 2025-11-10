@@ -6,166 +6,142 @@ import { useNavigate } from 'react-router-dom';
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 axios.defaults.withCredentials = true;
 
-// Create global context for the entire app
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
+  const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY;
-  const navigate = useNavigate(); // Handle page navigation
-  const [user, setUser] = useState(null); // Store current user info
-  const [isSeller, setIsSeller] = useState(false); // Check if user is a seller
-  const [showUserLogin, setShowUserLogin] = useState(false); // Toggle login popup
+
+  // ✅ Lấy user từ localStorage khi khởi tạo
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const [isSeller, setIsSeller] = useState(false);
+  const [showUserLogin, setShowUserLogin] = useState(false);
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
-  const [searchQuery, setSearchQuery] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch seller status
-  const fetchSeller = async () => {
-    try {
-      const { data } = await axios.get('/api/seller/is-auth');
-      if (data.success) {
-        setIsSeller(true);
-      } else {
-        setIsSeller(false);
-      }
-    } catch (error) {
-      setIsSeller(false);
-      console.log(error);
+  // ✅ Lưu user vào localStorage khi thay đổi
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
     }
-  };
+  }, [user]);
 
-  // Fetch user info
+  // ✅ Gọi API kiểm tra user từ server khi app khởi động
   const fetchUser = async () => {
     try {
       const { data } = await axios.get('/api/user/is-auth');
       if (data.success) {
         setUser(data.user);
-        setCartItems(data.user.cartItems);
+        setCartItems(data.user.cartItems || {});
+      } else {
+        setUser(null);
+        localStorage.removeItem('user');
       }
-    } catch (error) {
+    } catch {
       setUser(null);
-      console.log(error);
+      localStorage.removeItem('user');
     }
   };
-  // Fetch All Products
+
+  // ✅ Kiểm tra seller
+  const fetchSeller = async () => {
+    try {
+      const { data } = await axios.get('/api/seller/is-auth');
+      setIsSeller(data.success);
+    } catch {
+      setIsSeller(false);
+    }
+  };
+
+  // ✅ Lấy danh sách sản phẩm
   const fetchProducts = async () => {
     try {
       const { data } = await axios.get('/api/product/list');
-      if (data.success) {
-        setProducts(data.products);
-      } else {
-        toast.error(data.message);
+      if (data.success) setProducts(data.products);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ✅ Cập nhật cart khi thay đổi
+  useEffect(() => {
+    const updateCart = async () => {
+      try {
+        await axios.post('/api/user/update', { cartItems });
+      } catch (err) {
+        console.log(err);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const updateProduct = async (id, updatedProduct) => {
-    try {
-      const { data } = await axios.put(`/api/product/update/${id}`, updatedProduct);
-      if (data.success) {
-        toast.success('Product updated successfully');
-        fetchProducts();
-      } else {
-        toast.error(data.message);
-      }
-      return data;
-    } catch (error) {
-      toast.error('Error updating product');
-      console.log(error);
-    }
-  };
+    };
+    if (user) updateCart();
+  }, [cartItems]);
 
-  // DELETE
-  const deleteProduct = async (id) => {
-    try {
-      const { data } = await axios.delete(`/api/product/delete/${id}`);
-      if (data.success) {
-        toast.success('Product deleted successfully');
-        fetchProducts();
-      } else {
-        toast.error(data.message);
-      }
-      return data;
-    } catch (error) {
-      toast.error('Error deleting product');
-      console.log(error);
-    }
-  };
-
-  const addToCart = (itemId) => {
-    const cartData = structuredClone(cartItems || {});
-
-    cartData[itemId] = (cartData[itemId] || 0) + 1;
-
-    setCartItems(cartData);
-    toast.success('Item added to cart');
-  };
-
-  // Update product quantity directly
-  const updateCartItem = (itemId, quantity) => {
-    let cartData = structuredClone(cartItems);
-    cartData[itemId] = quantity;
-    setCartItems(cartData);
-    toast.success('Cart updated');
-  };
-
-  // Remove product from cart (decrease quantity or delete)
-  const removeFromCart = (itemId) => {
-    let cartData = structuredClone(cartItems);
-    if (cartData[itemId]) {
-      cartData[itemId] -= 1;
-      if (cartData[itemId] === 0) {
-        delete cartData[itemId];
-      }
-    }
-    toast.success('Item removed from cart');
-    setCartItems(cartData);
-  };
-
-  const getCartCount = () => {
-    let totalCount = 0;
-    for (const item in cartItems) {
-      totalCount += cartItems[item];
-    }
-    return totalCount;
-  };
-
-  const getCartAmount = () => {
-    let totalAmount = 0;
-    for (const items in cartItems) {
-      let itemInfo = products.find((product) => product._id === items);
-      if (cartItems[items] > 0) {
-        totalAmount += itemInfo.offerPrice * cartItems[items];
-      }
-    }
-    return Math.floor(totalAmount * 100) / 100;
-  };
-
-  // Load products on first render
+  // ✅ Khi app load lần đầu
   useEffect(() => {
     fetchUser();
     fetchSeller();
     fetchProducts();
   }, []);
 
-  useEffect(() => {
-    const updateCart = async () => {
-      try {
-        const { data } = await axios.post('/api/user/update', { cartItems });
-        if (!data.success) {
-          toast.error(data.message);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    if (user) {
-      updateCart();
-    }
-  }, [cartItems]);
+  // ✅ Giỏ hàng
+  const addToCart = (id) => {
+    const p = products.find((x) => x._id === id);
+    if (!p) return toast.error('Sản phẩm không tồn tại');
+    const newCart = structuredClone(cartItems || {});
+    const newQty = (newCart[id] || 0) + 1;
+    if (newQty > p.stockQty) return toast.error(`Chỉ còn ${p.stockQty} sản phẩm`);
+    newCart[id] = newQty;
+    setCartItems(newCart);
+    toast.success('Đã thêm vào giỏ hàng');
+  };
 
-  // Shared data for the entire app
+  const updateCartItem = (id, qty) => {
+    const p = products.find((x) => x._id === id);
+    if (!p) return;
+    if (qty > p.stockQty) return toast.error(`Chỉ còn ${p.stockQty} sản phẩm`);
+    const newCart = structuredClone(cartItems);
+    newCart[id] = qty;
+    setCartItems(newCart);
+  };
+
+  const removeFromCart = (id) => {
+    const newCart = structuredClone(cartItems);
+    if (newCart[id]) {
+      newCart[id] -= 1;
+      if (newCart[id] === 0) delete newCart[id];
+    }
+    setCartItems(newCart);
+    toast.success('Đã xóa khỏi giỏ hàng');
+  };
+
+  const getCartCount = () => Object.values(cartItems).reduce((a, b) => a + b, 0);
+  const getCartAmount = () =>
+    Math.floor(
+      Object.entries(cartItems).reduce((sum, [id, qty]) => {
+        const p = products.find((x) => x._id === id);
+        return sum + (p?.offerPrice || 0) * qty;
+      }, 0) * 100,
+    ) / 100;
+
+  // ✅ Logout
+  const logout = async () => {
+    try {
+      await axios.post('/api/user/logout');
+      setUser(null);
+      localStorage.removeItem('user');
+      toast.success('Đã đăng xuất');
+      navigate('/');
+    } catch {
+      toast.error('Logout failed');
+    }
+  };
+
   const value = {
     navigate,
     user,
@@ -177,22 +153,20 @@ export const AppContextProvider = ({ children }) => {
     products,
     currency,
     addToCart,
-    updateProduct,
-    deleteProduct,
     updateCartItem,
     removeFromCart,
     cartItems,
-    searchQuery,
-    setSearchQuery,
+    setCartItems,
     getCartCount,
     getCartAmount,
-    axios,
     fetchProducts,
-    setCartItems,
+    axios,
+    logout,
+    searchQuery,
+    setSearchQuery,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-// Custom hook to use app context
 export const useAppContext = () => useContext(AppContext);

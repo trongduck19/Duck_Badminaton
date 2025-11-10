@@ -11,21 +11,20 @@ const Login = () => {
   const [password, setPassword] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false); // trạng thái show/hide pass
 
-  const onSubmitHandler = async (event) => {
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
     try {
-      event.preventDefault();
       const { data } = await axios.post(`/api/user/${state}`, { name, email, password });
-
       if (data.success) {
-        navigate('/');
+        toast.success('Welcome!');
         setUser(data.user);
         setShowUserLogin(false);
+        navigate('/');
       } else {
         toast.error(data.message);
       }
-    } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      toast.error(error.response?.data?.message || error.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Login failed');
     }
   };
 

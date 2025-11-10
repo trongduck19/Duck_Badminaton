@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -7,9 +8,25 @@ const ProductList = () => {
   const { products, currency, axios, fetchProducts } = useAppContext();
   const navigate = useNavigate();
 
-  const toggleStock = async (id, inStock) => {
+  // ---- Pagination ----
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentProducts = products.slice(indexOfFirst, indexOfLast);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // ---- Handlers ----
+  const toggleStock = async (product) => {
     try {
-      const { data } = await axios.post(`/api/product/stock`, { id, inStock });
+      const { data } = await axios.post(`/api/product/stock`, {
+        id: product._id,
+        inStock: !product.inStock,
+        stockQty: product.stockQty || 0,
+      });
       if (data.success) {
         fetchProducts();
         toast.success(data.message);
@@ -18,7 +35,26 @@ const ProductList = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error('Lỗi khi cập nhật trạng thái tồn kho');
+      toast.error('Error updating stock');
+    }
+  };
+
+  const updateStockQty = async (product, qty) => {
+    try {
+      const { data } = await axios.post(`/api/product/stock`, {
+        id: product._id,
+        inStock: qty > 0,
+        stockQty: qty,
+      });
+      if (data.success) {
+        fetchProducts();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error('Error updating stock quantity');
     }
   };
 
@@ -34,33 +70,33 @@ const ProductList = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error('Lỗi khi xóa sản phẩm');
+      toast.error('Error deleting product');
     }
   };
 
   const handleEdit = (id) => navigate(`/seller/edit/${id}`);
 
+  // ---- UI ----
   return (
     <div className="flex-1 overflow-y-scroll bg-gray-50 no-scrollbar">
       <div className="w-full md:p-10 p-4">
         <h2 className="pb-4 text-lg md:text-2xl font-semibold text-gray-800">All Products</h2>
 
         <div className="w-full overflow-x-auto rounded-lg bg-white border border-gray-200 shadow-md">
-          <table className="min-w-[750px] w-full text-xs sm:text-sm md:text-base">
+          <table className="min-w-[850px] w-full text-xs sm:text-sm md:text-base">
             <thead className="text-gray-700 bg-gray-100">
               <tr>
-                <th className="px-4 py-3 font-semibold text-left">Product</th>
-                <th className="px-4 py-3 font-semibold text-left">Category</th>
-                <th className="px-4 py-3 font-semibold text-left hidden sm:table-cell">
-                  Selling Price
-                </th>
-                <th className="px-4 py-3 font-semibold text-center">In Stock</th>
-                <th className="px-4 py-3 font-semibold text-center">Actions</th>
+                <th className="px-4 py-3 text-left">Product</th>
+                <th className="px-4 py-3 text-left">Category</th>
+                <th className="px-4 py-3 text-left hidden sm:table-cell">Selling Price</th>
+                <th className="px-4 py-3 text-center">In Stock</th>
+                <th className="px-4 py-3 text-center">Stock Qty</th>
+                <th className="px-4 py-3 text-center">Actions</th>
               </tr>
             </thead>
 
             <tbody className="text-gray-600">
-              {products.map((product) => (
+              {currentProducts.map((product) => (
                 <tr
                   key={product._id}
                   className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-200"
@@ -88,18 +124,27 @@ const ProductList = () => {
 
                   {/* In Stock Toggle */}
                   <td className="px-4 py-3 text-center">
-                    <div className="flex flex-col items-center space-y-1">
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          onChange={() => toggleStock(product._id, !product.inStock)}
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={product.inStock}
-                        />
-                        <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary transition-colors duration-300"></div>
-                        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
-                      </label>
-                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        onChange={() => toggleStock(product)}
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={product.inStock}
+                      />
+                      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary transition-colors duration-300"></div>
+                      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                    </label>
+                  </td>
+
+                  {/* Stock Quantity */}
+                  <td className="px-4 py-3 text-center">
+                    <input
+                      type="number"
+                      min="0"
+                      value={product.stockQty || 0}
+                      onChange={(e) => updateStockQty(product, Number(e.target.value))}
+                      className="w-16 text-center border rounded-md px-2 py-1"
+                    />
                   </td>
 
                   {/* Actions */}
@@ -125,7 +170,22 @@ const ProductList = () => {
           </table>
         </div>
 
-        <div className="mt-10"></div>
+        {/* Pagination */}
+        <div className="flex justify-center items-center mt-6 space-x-2">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index}
+              onClick={() => paginate(index + 1)}
+              className={`px-4 py-2 rounded-lg border ${
+                currentPage === index + 1
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+              } transition`}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

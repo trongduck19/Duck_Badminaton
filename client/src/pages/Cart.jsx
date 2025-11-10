@@ -16,6 +16,7 @@ const Cart = () => {
     axios,
     user,
     setCartItems,
+    setShowUserLogin,
   } = useAppContext();
 
   const [cartArray, setCartArray] = useState([]);
@@ -35,25 +36,27 @@ const Cart = () => {
   };
 
   const getUserAddresses = async () => {
-  try {
-    const { data } = await axios.get('/api/address/get'); // token tự gửi qua cookie
-    if (data.success && data.addresses.length > 0) {
-      setAddresses(data.addresses);
-      setSelectedAddress(data.addresses[0]);
-    } else {
-      toast.error('No addresses found.');
+    try {
+      const { data } = await axios.get('/api/address/get');
+      if (data.success && data.addresses.length > 0) {
+        setAddresses(data.addresses);
+        setSelectedAddress(data.addresses[0]);
+      } else {
+        toast.error('No addresses found.');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to load addresses.');
     }
-  } catch (error) {
-    console.error(error);
-    toast.error('Failed to load addresses.');
-  }
-};
-
+  };
 
   const placeOrder = async () => {
     try {
-      if (!user) return toast.error('You must be logged in to place an order.');
-      if (!selectedAddress) return toast.error('Please select a delivery address.');
+      if (!user) {
+        toast.error('Please login to place your order');
+        setShowUserLogin(true);
+        return;
+      }
 
       const items = cartArray.map((item) => ({
         product: item._id,

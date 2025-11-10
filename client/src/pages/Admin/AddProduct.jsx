@@ -11,6 +11,7 @@ const AddProduct = () => {
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
   const [loading, setLoading] = useState(false);
+  const [stockQuantity, setStockQuantity] = useState(0);
 
   const { axios, currency } = useAppContext();
 
@@ -25,7 +26,8 @@ const AddProduct = () => {
         category,
         price,
         offerPrice,
-        inStock: true,
+        inStock: stockQuantity > 0,
+        stockQty: stockQuantity,
       };
 
       const formData = new FormData();
@@ -184,6 +186,18 @@ const AddProduct = () => {
               required
             />
           </div>
+        </div>
+        <div className="flex-1 flex flex-col gap-1">
+          <label className="font-medium text-gray-700">Stock Quantity</label>
+          <input
+            value={stockQuantity}
+            onChange={(e) => setStockQuantity(Number(e.target.value))}
+            type="number"
+            placeholder="0"
+            min={0}
+            className="outline-none py-2.5 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition"
+            required
+          />
         </div>
 
         {/* --- SUBMIT --- */}

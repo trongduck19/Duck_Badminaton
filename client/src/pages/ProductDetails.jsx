@@ -80,12 +80,14 @@ const ProductDetails = () => {
               .map((_, i) => (
                 <img
                   key={i}
-                  src={i < 4 ? assets.star_icon : assets.star_dull_icon}
+                  src={
+                    i < Math.floor(product.rating || 4) ? assets.star_icon : assets.star_dull_icon
+                  }
                   alt="star"
                   className="w-4 h-4"
                 />
               ))}
-            <span className="ml-2 text-gray-500 text-sm">(4.0)</span>
+            <span className="ml-2 text-gray-500 text-sm">({product.rating || 4})</span>
           </div>
 
           {/* Price */}
@@ -101,6 +103,17 @@ const ProductDetails = () => {
             <span className="text-gray-500 text-sm">(Inclusive of all taxes)</span>
           </div>
 
+          {/* Stock Status */}
+          <div className="mt-3">
+            {product.inStock && product.stockQty > 0 ? (
+              <p className="text-green-600 font-semibold">
+                In Stock: {product.stockQty} items left
+              </p>
+            ) : (
+              <p className="text-red-600 font-semibold">Sold Out</p>
+            )}
+          </div>
+
           {/* Description */}
           <div className="mt-8">
             <p className="font-medium text-lg mb-2">About Product</p>
@@ -111,11 +124,16 @@ const ProductDetails = () => {
             </ul>
           </div>
 
-          {/* Buttons */}
+          {/* Add to Cart / Buy Now */}
           <div className="flex items-center gap-4 mt-10">
             <button
               onClick={() => addToCart(product._id)}
-              className="flex-1 py-3 rounded-lg font-medium border border-gray-300 bg-gray-50 hover:bg-gray-100 transition"
+              disabled={!product.inStock || product.stockQty === 0}
+              className={`flex-1 py-3 rounded-lg font-medium border border-gray-300 transition ${
+                product.inStock && product.stockQty > 0
+                  ? 'bg-gray-50 hover:bg-gray-100'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
               Add to Cart
             </button>
@@ -124,7 +142,12 @@ const ProductDetails = () => {
                 addToCart(product._id);
                 navigate('/cart');
               }}
-              className="flex-1 py-3 rounded-lg font-medium bg-primary text-white hover:bg-primary/90 transition"
+              disabled={!product.inStock || product.stockQty === 0}
+              className={`flex-1 py-3 rounded-lg font-medium transition ${
+                product.inStock && product.stockQty > 0
+                  ? 'bg-primary text-white hover:bg-primary/90'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               Buy Now
             </button>
@@ -141,7 +164,7 @@ const ProductDetails = () => {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-8 w-full">
           {relatedProducts
-            .filter((item) => item.inStock)
+            .filter((item) => item.inStock && item.stockQty > 0)
             .map((item, i) => (
               <ProductCard key={i} product={item} />
             ))}
