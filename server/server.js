@@ -18,19 +18,10 @@ const port = process.env.PORT || 4000;
 await connectDB();
 await connectCloudinary();
 //Alow multiple origin
-const allowOrigin = ['http://localhost:5173', 'https://duckbadminton.vercel.app'];
-
+const allowOrigin = ['http://localhost:5173', 'https://trongduck19.github.io'];
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
-      if (!origin) return callback(null, true);
-      if (allowOrigin.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
+    origin: allowOrigin,
     credentials: true,
   }),
 );
