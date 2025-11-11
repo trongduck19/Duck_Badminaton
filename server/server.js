@@ -1,5 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import express from 'express';
 import connectCloudinary from './configs/cloudinary.js';
 import connectDB from './configs/db.js';
@@ -10,7 +11,6 @@ import orderRouter from './routes/orderRoute.js';
 import productRouter from './routes/productRoute.js';
 import sellerRouter from './routes/sellerRoute.js';
 import userRouter from './routes/userRoute.js';
-import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
@@ -18,7 +18,13 @@ const port = process.env.PORT || 4000;
 await connectDB();
 await connectCloudinary();
 //Alow multiple origin
-const allowOrigin = ['http://localhost:5173','https://duck-badminaton.vercel.app'];
+const allowOrigin = ['http://localhost:5173', 'https://trongduck19.github.io'];
+app.use(
+  cors({
+    origin: allowOrigin,
+    credentials: true,
+  }),
+);
 
 //Stripe Webhook
 app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
