@@ -6,13 +6,13 @@ const Footer = () => {
     <footer className="bg-white mt-20 border-t border-gray-200 text-gray-700">
       {/* --- Top Section --- */}
       <div className="px-6 md:px-16 lg:px-24 xl:px-32 py-10 grid grid-cols-1 md:grid-cols-4 gap-10">
-        {/* Column 1 - Connect */}
+        
         <div>
           <h3 className="font-semibold text-lg text-gray-900 mb-4">Connect with us</h3>
           <div className="flex items-center gap-4 mb-6">
-            {/* Facebook */}
+            
             <img src={assets.icon_fb} alt="icon_fb" className="w-8 h-8" />
-            {/* Zalo (dùng ảnh thay icon) */}
+            
             <a href="#">
               <div className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10">
                 <img src={assets.icon_zalo} alt="icon_zalo" className="w-8 h-8" />

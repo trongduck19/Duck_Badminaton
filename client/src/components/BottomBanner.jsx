@@ -1,9 +1,9 @@
-import { assets } from '../assets/assets'; // nơi chứa icon
+import { assets } from '../assets/assets';
 
 const BottomBanner = () => {
   const features = [
     {
-      icon: assets.truck_icon, // 👉 thay icon của bạn
+      icon: assets.truck_icon,
       title: 'Worldwide Shipping',
       desc: 'Pay on delivery at your doorstep.',
     },
@@ -26,12 +26,10 @@ const BottomBanner = () => {
 
   return (
     <div className="w-full mt-20 bg-white py-10">
-      {/* Title */}
       <h2 className="text-center text-3xl md:text-4xl font-semibold text-gray-800 mb-10">
         Why we are the best?
       </h2>
 
-      {/* Features grid */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 px-4">
         {features.map((item, index) => (
           <div

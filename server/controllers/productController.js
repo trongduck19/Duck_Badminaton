@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import Product from '../models/Product.js';
 
-// 🟢 Add Product: /api/product/add
+// Add Product: /api/product/add
 export const addProduct = async (req, res) => {
   try {
     const productData = JSON.parse(req.body.productData);
@@ -23,7 +23,7 @@ export const addProduct = async (req, res) => {
       image: imagesUrl,
     });
 
-    // 🧾 Cập nhật inStock theo stockQty
+ 
     newProduct.inStock = newProduct.stockQty > 0;
 
     await newProduct.save();

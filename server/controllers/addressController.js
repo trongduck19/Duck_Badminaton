@@ -4,7 +4,7 @@ import Address from '../models/Address.js';
 export const addAddress = async (req, res) => {
   try {
     const { address } = req.body;
-    const userId = req.user._id; // lấy từ middleware authUser
+    const userId = req.user._id;
     if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
     await Address.create({ ...address, userId });
