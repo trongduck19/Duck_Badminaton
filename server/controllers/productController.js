@@ -34,7 +34,7 @@ export const addProduct = async (req, res) => {
   }
 };
 
-// 🟡 Get All Products: /api/product/list
+// Get All Products: /api/product/list
 export const productList = async (req, res) => {
   try {
     const products = await Product.find({});
@@ -45,7 +45,7 @@ export const productList = async (req, res) => {
   }
 };
 
-// 🔵 Get Product by ID: /api/product/:id
+// Get Product by ID: /api/product/:id
 export const productById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -58,7 +58,7 @@ export const productById = async (req, res) => {
   }
 };
 
-// 🟠 Change Product Stock: /api/product/stock
+// Change Product Stock: /api/product/stock
 export const changeStock = async (req, res) => {
   try {
     const { id, stockQty } = req.body;
@@ -77,7 +77,7 @@ export const changeStock = async (req, res) => {
   }
 };
 
-// 🟣 Update Product: PUT /api/product/:id
+// Update Product: PUT /api/product/:id
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -111,7 +111,7 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-// 🔴 Delete Product: DELETE /api/product/:id
+//Delete Product: DELETE /api/product/:id
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
