@@ -92,19 +92,19 @@ export const AppContextProvider = ({ children }) => {
   // ✅ Giỏ hàng
   const addToCart = (id) => {
     const p = products.find((x) => x._id === id);
-    if (!p) return toast.error('Sản phẩm không tồn tại');
+    if (!p) return toast.error('Product does not exist');
     const newCart = structuredClone(cartItems || {});
     const newQty = (newCart[id] || 0) + 1;
-    if (newQty > p.stockQty) return toast.error(`Chỉ còn ${p.stockQty} sản phẩm`);
+    if (newQty > p.stockQty) return toast.error(`Only ${p.stockQty} items left`);
     newCart[id] = newQty;
     setCartItems(newCart);
-    toast.success('Đã thêm vào giỏ hàng');
+    toast.success('Added to cart');
   };
 
   const updateCartItem = (id, qty) => {
     const p = products.find((x) => x._id === id);
     if (!p) return;
-    if (qty > p.stockQty) return toast.error(`Chỉ còn ${p.stockQty} sản phẩm`);
+    if (qty > p.stockQty) return toast.error(`Only ${p.stockQty} items left`);
     const newCart = structuredClone(cartItems);
     newCart[id] = qty;
     setCartItems(newCart);
@@ -117,7 +117,7 @@ export const AppContextProvider = ({ children }) => {
       if (newCart[id] === 0) delete newCart[id];
     }
     setCartItems(newCart);
-    toast.success('Đã xóa khỏi giỏ hàng');
+    toast.success('Removed from cart');
   };
 
   const getCartCount = () => Object.values(cartItems).reduce((a, b) => a + b, 0);
@@ -135,7 +135,7 @@ export const AppContextProvider = ({ children }) => {
       await axios.post('/api/user/logout');
       setUser(null);
       localStorage.removeItem('user');
-      toast.success('Đã đăng xuất');
+      toast.success('Logged out successfully');
       navigate('/');
     } catch {
       toast.error('Logout failed');
