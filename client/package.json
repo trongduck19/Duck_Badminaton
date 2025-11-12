@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://trongduck19.github.io/duck-badminton",
+  "homepage": "https://trongduck19.github.io/Duck_Badminaton",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",

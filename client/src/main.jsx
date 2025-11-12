@@ -5,7 +5,7 @@ import { AppContextProvider } from './context/AppContext';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter basename="/duck-badminton">
+  <BrowserRouter basename="/Duck_Badminaton">
     <AppContextProvider>
       <App />
     </AppContextProvider>
